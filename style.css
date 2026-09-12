@@ -1,0 +1,807 @@
+/* ===================================================
+   暖色調三欄看板待辦清單 (Kanban Minimalist Warm-Tone)
+   =================================================== */
+
+:root {
+  /* 暖色系基調色彩 */
+  --bg-page: #FAF7F2;
+  --bg-card: #FFFFFF;
+  --bg-column: #F5EFEB;
+  --bg-subtle: #ECE4DA;
+  --border-subtle: #E8DFD3;
+  --border-focus: #D97036;
+
+  /* 文字色彩 */
+  --text-main: #2D2621;
+  --text-muted: #786E67;
+  --text-faint: #ABA097;
+
+  /* 狀態重點色 */
+  --accent: #D97036;
+  --accent-hover: #C45F27;
+  --accent-light: #FBF2EB;
+  --accent-ring: rgba(217, 112, 54, 0.18);
+
+  /* 三欄專屬色彩 */
+  --todo-color: #7B6F66;
+  --todo-bg: #EFE8E1;
+  --todo-border: #E0D4C8;
+
+  --process-color: #D97036;
+  --process-bg: #FAEDE4;
+  --process-border: #F3D2BF;
+
+  --done-color: #486A4C;
+  --done-bg: #EAF0E6;
+  --done-border: #CFDEC9;
+
+  /* 工作與生活分類 */
+  --work-bg: #F6EBE2;
+  --work-text: #8E562F;
+  --work-dot: #C27641;
+
+  --life-bg: #EAF0E6;
+  --life-text: #486A4C;
+  --life-dot: #6A966F;
+
+  /* 負責人標籤 */
+  --assignee-bg: #F4EFEB;
+  --assignee-text: #61554E;
+  --assignee-border: #E4DAD0;
+
+  /* 刪除回饋 */
+  --danger-text: #C44D3F;
+  --danger-bg: #FAECE9;
+
+  /* 陰影與圓角 */
+  --shadow-sm: 0 2px 6px rgba(70, 45, 30, 0.04);
+  --shadow-card: 0 8px 24px -4px rgba(70, 45, 30, 0.06), 0 2px 6px rgba(70, 45, 30, 0.02);
+  --shadow-hover: 0 6px 18px rgba(70, 45, 30, 0.08);
+  --shadow-drag: 0 16px 32px rgba(70, 45, 30, 0.18);
+
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --radius-pill: 9999px;
+
+  --transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* 全域重設 */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 應用程式容器（拓寬為看板模式） */
+.app-container {
+  width: 100%;
+  max-width: 1140px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header 標頭區 */
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 4px;
+}
+
+.date-badge {
+  display: inline-block;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-light);
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+
+.app-title {
+  font-size: 1.9rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.02em;
+}
+
+.app-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* 頂部狀態概覽膠囊 */
+.stats-overview {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-card);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-sm);
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+}
+
+.stat-label {
+  color: var(--text-muted);
+}
+
+.stat-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.dot-todo { background: var(--todo-color); }
+.dot-process { background: var(--process-color); }
+.dot-done { background: var(--done-color); }
+
+/* 表單卡片區 */
+.form-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+}
+
+.todo-form {
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FCFAF7 100%);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.input-field {
+  width: 100%;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-card);
+  color: var(--text-main);
+  padding: 11px 16px;
+  font-size: 0.95rem;
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.input-field:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+
+.input-field::placeholder {
+  color: var(--text-faint);
+}
+
+.task-input {
+  font-size: 1rem;
+}
+
+/* 負責人輸入 */
+.input-with-icon {
+  position: relative;
+  flex: 1.1;
+}
+
+.input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.85rem;
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+.assignee-input {
+  padding-left: 34px;
+  font-size: 0.875rem;
+}
+
+/* 分類選項單選膠囊 */
+.category-selector {
+  display: flex;
+  background: var(--bg-column);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  gap: 4px;
+  align-items: center;
+}
+
+.category-option {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.category-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.cat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.cat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: 0.6;
+}
+
+.category-option input:checked + .pill-work {
+  background: var(--bg-card);
+  color: var(--work-text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.category-option input:checked + .pill-work .cat-dot {
+  background: var(--work-dot);
+  opacity: 1;
+}
+
+.category-option input:checked + .pill-life {
+  background: var(--bg-card);
+  color: var(--life-text);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+.category-option input:checked + .pill-life .cat-dot {
+  background: var(--life-dot);
+  opacity: 1;
+}
+
+/* 優先級選擇膠囊 */
+.priority-selector {
+  display: flex;
+  background: var(--bg-column);
+  padding: 4px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+  gap: 4px;
+  align-items: center;
+}
+
+.priority-option {
+  position: relative;
+  cursor: pointer;
+  user-select: none;
+}
+
+.priority-option input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.prio-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: var(--transition);
+}
+
+.priority-option input:checked + .prio-high {
+  background: #FBEAE7;
+  color: #C44332;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.priority-option input:checked + .prio-medium {
+  background: #FCF1E6;
+  color: #BD6D27;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+.priority-option input:checked + .prio-low {
+  background: #EFF3ED;
+  color: #597357;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+/* 按鈕樣式 */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #FFFFFF;
+  padding: 0 18px;
+  white-space: nowrap;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 4px 12px rgba(217, 112, 54, 0.28);
+}
+
+.btn-primary:active {
+  transform: scale(0.98);
+}
+
+.btn-text {
+  background: transparent;
+  color: var(--text-muted);
+  padding: 6px 12px;
+  font-size: 0.8125rem;
+  border-radius: var(--radius-sm);
+}
+
+.btn-text:hover {
+  color: var(--danger-text);
+  background: var(--danger-bg);
+}
+
+/* 篩選 Bar */
+.filter-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 20px;
+  background: #FCFAF7;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.filter-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: var(--transition);
+  font-family: inherit;
+}
+
+.filter-btn:hover {
+  color: var(--text-main);
+  background: var(--bg-subtle);
+}
+
+.filter-btn.active {
+  background: var(--bg-card);
+  color: var(--accent);
+  border-color: var(--border-subtle);
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+}
+
+/* ===================================================
+   看板佈局 (Kanban Board)
+   =================================================== */
+
+.kanban-board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: flex-start;
+}
+
+.kanban-column {
+  background: var(--bg-column);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: var(--transition);
+}
+
+/* 欄位標頭 */
+.column-header {
+  padding: 14px 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-subtle);
+  background: #FAF5EF;
+}
+
+.col-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.col-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.col-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text-main);
+  letter-spacing: -0.01em;
+}
+
+.col-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+}
+
+.header-todo .col-badge {
+  color: var(--todo-color);
+  background: var(--todo-bg);
+  border-color: var(--todo-border);
+}
+
+.header-process .col-badge {
+  color: var(--process-color);
+  background: var(--process-bg);
+  border-color: var(--process-border);
+}
+
+.header-done .col-badge {
+  color: var(--done-color);
+  background: var(--done-bg);
+  border-color: var(--done-border);
+}
+
+.col-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+/* 拖曳放置區 (Dropzone) */
+.column-dropzone {
+  min-height: 380px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: var(--transition);
+  border: 2px dashed transparent;
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+
+/* 拖曳懸停高亮狀態 */
+.column-dropzone.drag-over {
+  background: #FCF4ED;
+  border-color: var(--accent);
+}
+
+/* 任務卡片樣式 */
+.task-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: grab;
+  user-select: none;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+  animation: cardFadeIn 0.22s ease-out;
+}
+
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.task-card:hover {
+  border-color: #DFD4C8;
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+.task-card:active {
+  cursor: grabbing;
+}
+
+/* 正在被拖曳的卡片特效 */
+.task-card.dragging {
+  opacity: 0.45;
+  transform: rotate(2.5deg) scale(0.97);
+  box-shadow: var(--shadow-drag);
+  border: 2px dashed var(--accent);
+  background: #FDF9F5;
+}
+
+/* 卡片主體內容 */
+.card-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.card-title {
+  font-size: 0.9375rem;
+  font-weight: 500;
+  color: var(--text-main);
+  line-height: 1.45;
+  word-break: break-word;
+  flex: 1;
+}
+
+/* Done 欄位的卡片微調 */
+.task-card.is-done .card-title {
+  color: var(--text-faint);
+  text-decoration: line-through;
+}
+
+.task-card.is-done {
+  border-left: 3px solid var(--done-color);
+  background: #FCFBF9;
+}
+
+/* 刪除卡片按鈕 */
+.card-delete-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-faint);
+  width: 24px;
+  height: 24px;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: var(--transition);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.task-card:hover .card-delete-btn {
+  opacity: 1;
+}
+
+.card-delete-btn:hover {
+  background: var(--danger-bg);
+  color: var(--danger-text);
+}
+
+/* 卡片底部標籤與操作 */
+.card-footer-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.card-tags {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.badge {
+  font-size: 0.72rem;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1.4;
+}
+
+.badge-work {
+  background: var(--work-bg);
+  color: var(--work-text);
+}
+
+.badge-life {
+  background: var(--life-bg);
+  color: var(--life-text);
+}
+
+.badge-assignee {
+  background: var(--assignee-bg);
+  color: var(--assignee-text);
+  border: 1px solid var(--assignee-border);
+}
+
+/* 優先級徽章 (High, Medium, Low) */
+.badge-prio-high {
+  background: #FBEAE7;
+  color: #C44332;
+  border: 1px solid #F3CBC4;
+}
+
+.badge-prio-medium {
+  background: #FCF1E6;
+  color: #BD6D27;
+  border: 1px solid #F6D7BC;
+}
+
+.badge-prio-low {
+  background: #EFF3ED;
+  color: #597357;
+  border: 1px solid #D8E2D6;
+}
+
+/* 拖曳手柄指示圖示 */
+.drag-indicator {
+  display: flex;
+  align-items: center;
+  color: var(--text-faint);
+  font-size: 0.75rem;
+  opacity: 0.6;
+}
+
+/* 欄位空狀態 (Empty Column) */
+.column-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 12px;
+  color: var(--text-faint);
+  text-align: center;
+  gap: 8px;
+}
+
+.column-empty-icon {
+  font-size: 1.5rem;
+  opacity: 0.6;
+}
+
+.column-empty-text {
+  font-size: 0.8125rem;
+}
+
+/* 頁面外底部聲明 */
+.page-footer {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--text-faint);
+  padding: 6px 0;
+}
+
+/* ===================================================
+   響應式排版 (Responsive RWD)
+   =================================================== */
+
+@media (max-width: 900px) {
+  .kanban-board {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .column-dropzone {
+    min-height: 180px;
+  }
+
+  .stats-overview {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 20px 12px;
+  }
+
+  .app-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .form-row.meta-input-row {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .category-selector,
+  .priority-selector {
+    justify-content: space-around;
+  }
+
+  .category-option,
+  .priority-option {
+    flex: 1;
+    text-align: center;
+  }
+
+  .cat-pill,
+  .prio-pill {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .filter-tabs {
+    justify-content: space-between;
+  }
+
+  .btn-text {
+    align-self: flex-end;
+  }
+}

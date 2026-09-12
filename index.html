@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>暖色調看板清單 | Kanban Todo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header Section -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="date-badge" id="currentDate">載入日期中...</div>
+        <h1 class="app-title">任務看板</h1>
+        <p class="app-subtitle">溫暖從容，以三階段看板自由推進與拖曳每項進度</p>
+      </div>
+      <div class="stats-overview">
+        <div class="stat-item">
+          <span class="stat-dot dot-todo"></span>
+          <span class="stat-label">To-do:</span>
+          <strong id="headerTodoCount">0</strong>
+        </div>
+        <div class="stat-item">
+          <span class="stat-dot dot-process"></span>
+          <span class="stat-label">Process:</span>
+          <strong id="headerProcessCount">0</strong>
+        </div>
+        <div class="stat-item">
+          <span class="stat-dot dot-done"></span>
+          <span class="stat-label">Done:</span>
+          <strong id="headerDoneCount">0</strong>
+        </div>
+      </div>
+    </header>
+
+    <!-- Task Creation Form Card -->
+    <section class="form-card">
+      <form id="todoForm" class="todo-form">
+        <div class="form-row main-input-row">
+          <input 
+            type="text" 
+            id="taskInput" 
+            class="input-field task-input" 
+            placeholder="建立新任務... (支援 Enter 送出)" 
+            autocomplete="off"
+            required
+          />
+        </div>
+        
+        <div class="form-row meta-input-row">
+          <div class="input-with-icon assignee-wrapper">
+            <span class="input-icon">👤</span>
+            <input 
+              type="text" 
+              id="assigneeInput" 
+              class="input-field assignee-input" 
+              placeholder="負責人 (選填)" 
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="category-selector">
+            <label class="category-option">
+              <input type="radio" name="taskCategory" value="work" checked>
+              <span class="cat-pill pill-work">
+                <span class="cat-dot"></span>工作
+              </span>
+            </label>
+            <label class="category-option">
+              <input type="radio" name="taskCategory" value="life">
+              <span class="cat-pill pill-life">
+                <span class="cat-dot"></span>生活
+              </span>
+            </label>
+          </div>
+
+          <!-- Priority Selector (High, Medium, Low) -->
+          <div class="priority-selector" title="任務優先程度">
+            <label class="priority-option">
+              <input type="radio" name="taskPriority" value="high">
+              <span class="prio-pill prio-high">High</span>
+            </label>
+            <label class="priority-option">
+              <input type="radio" name="taskPriority" value="medium" checked>
+              <span class="prio-pill prio-medium">Med</span>
+            </label>
+            <label class="priority-option">
+              <input type="radio" name="taskPriority" value="low">
+              <span class="prio-pill prio-low">Low</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary add-btn" id="addBtn">
+            <svg class="btn-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19"></line>
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <span>建立至 To-do</span>
+          </button>
+        </div>
+      </form>
+
+      <!-- Category Filter Tabs & Actions -->
+      <div class="filter-bar">
+        <div class="filter-tabs" aria-label="分類篩選">
+          <button class="filter-btn active" data-filter="all">全部 (<span id="countAll">0</span>)</button>
+          <button class="filter-btn" data-filter="work">💼 工作 (<span id="countWork">0</span>)</button>
+          <button class="filter-btn" data-filter="life">🌿 生活 (<span id="countLife">0</span>)</button>
+        </div>
+        <button class="btn btn-text" id="clearCompletedBtn" title="清除 Done 欄位的所有任務">
+          清除已完成
+        </button>
+      </div>
+    </section>
+
+    <!-- Three Column Kanban Board -->
+    <main class="kanban-board">
+      <!-- 1. To-do Column -->
+      <div class="kanban-column" id="col-todo" data-status="todo">
+        <div class="column-header header-todo">
+          <div class="col-title-group">
+            <span class="col-dot dot-todo"></span>
+            <h2 class="col-title">To-do</h2>
+            <span class="col-badge" id="colBadgeTodo">0</span>
+          </div>
+          <span class="col-subtitle">待辦清單</span>
+        </div>
+        <div class="column-dropzone" id="listTodo" data-status="todo">
+          <!-- Cards injected here -->
+        </div>
+      </div>
+
+      <!-- 2. Process Column -->
+      <div class="kanban-column" id="col-process" data-status="process">
+        <div class="column-header header-process">
+          <div class="col-title-group">
+            <span class="col-dot dot-process"></span>
+            <h2 class="col-title">Process</h2>
+            <span class="col-badge" id="colBadgeProcess">0</span>
+          </div>
+          <span class="col-subtitle">進行中</span>
+        </div>
+        <div class="column-dropzone" id="listProcess" data-status="process">
+          <!-- Cards injected here -->
+        </div>
+      </div>
+
+      <!-- 3. Done Column -->
+      <div class="kanban-column" id="col-done" data-status="done">
+        <div class="column-header header-done">
+          <div class="col-title-group">
+            <span class="col-dot dot-done"></span>
+            <h2 class="col-title">Done</h2>
+            <span class="col-badge" id="colBadgeDone">0</span>
+          </div>
+          <span class="col-subtitle">已完成</span>
+        </div>
+        <div class="column-dropzone" id="listDone" data-status="done">
+          <!-- Cards injected here -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Page Bottom Footer -->
+    <footer class="page-footer">
+      <p>💡 提示：按住並拖曳卡片即可在「To-do」、「Process」、「Done」三欄間隨意轉移 · 資料自動儲存於本機</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
