@@ -185,6 +185,11 @@ body {
   gap: 10px;
 }
 
+.meta-input-row {
+  flex-wrap: wrap;
+  align-items: center;
+}
+
 .input-field {
   width: 100%;
   border: 1px solid var(--border-subtle);
@@ -211,10 +216,11 @@ body {
   font-size: 1rem;
 }
 
-/* 負責人輸入 */
+/* 負責人與截止日期輸入 */
 .input-with-icon {
   position: relative;
   flex: 1.1;
+  min-width: 140px;
 }
 
 .input-icon {
@@ -227,9 +233,15 @@ body {
   pointer-events: none;
 }
 
-.assignee-input {
+.assignee-input,
+.date-input {
   padding-left: 34px;
   font-size: 0.875rem;
+}
+
+.date-input {
+  color: var(--text-main);
+  cursor: pointer;
 }
 
 /* 分類選項單選膠囊 */
@@ -699,6 +711,22 @@ body {
   background: #EFF3ED;
   color: #597357;
   border: 1px solid #D8E2D6;
+}
+
+/* 截止日期徽章 */
+.badge-due-date {
+  background: var(--bg-column);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
+  font-feature-settings: "tnum";
+}
+
+/* 截止日期：今天或已過期（標籤顯示紅色） */
+.badge-due-date.badge-due-urgent {
+  background: #FDF2F2;
+  color: #DC2626;
+  border: 1px solid #FCA5A5;
+  font-weight: 600;
 }
 
 /* 拖曳手柄指示圖示 */

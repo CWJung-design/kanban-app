@@ -66,6 +66,7 @@
   const todoForm = document.getElementById('todoForm');
   const taskInput = document.getElementById('taskInput');
   const assigneeInput = document.getElementById('assigneeInput');
+  const dueDateInput = document.getElementById('dueDateInput');
   const currentDateEl = document.getElementById('currentDate');
 
   const listTodo = document.getElementById('listTodo');
@@ -134,6 +135,10 @@
           if (!item.priority) {
             item.priority = 'medium';
           }
+          // 向下相容處理：截止日期選填
+          if (!item.dueDate) {
+            item.dueDate = '';
+          }
           return item;
         });
       } else {
@@ -201,6 +206,7 @@
     }
 
     const assignee = assigneeInput.value.trim();
+    const dueDate = dueDateInput ? dueDateInput.value.trim() : '';
     const categoryOption = document.querySelector('input[name="taskCategory"]:checked');
     const category = categoryOption ? categoryOption.value : 'work';
 
@@ -212,6 +218,7 @@
       text: text,
       category: category,
       assignee: assignee,
+      dueDate: dueDate,
       priority: priority,
       status: 'todo',
       createdAt: Date.now()
@@ -224,6 +231,7 @@
     // 清空輸入並回到焦點
     taskInput.value = '';
     assigneeInput.value = '';
+    if (dueDateInput) dueDateInput.value = '';
     taskInput.focus();
   }
 
@@ -377,6 +385,31 @@
   }
 
   /**
+   * 檢查截止日期是否為今天或已過期
+   */
+  function isDueOrOverdue(dateStr) {
+    if (!dateStr) return false;
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${yyyy}-${mm}-${dd}`;
+    return dateStr <= todayStr;
+  }
+
+  /**
+   * 將 YYYY-MM-DD 轉為 年/月/日 (YYYY/MM/DD)
+   */
+  function formatDueDate(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length === 3) {
+      return `${parts[0]}/${parts[1]}/${parts[2]}`;
+    }
+    return dateStr;
+  }
+
+  /**
    * 產生單一任務卡片 HTML
    */
   function createCardHTML(task) {
@@ -398,6 +431,15 @@
       priorityBadge = `<span class="badge badge-prio-low" title="優先程度：低">🌱 Low</span>`;
     } else {
       priorityBadge = `<span class="badge badge-prio-medium" title="優先程度：中">⚡ Med</span>`;
+    }
+
+    let dueDateBadge = '';
+    if (task.dueDate) {
+      const isUrgent = isDueOrOverdue(task.dueDate);
+      const formattedDate = formatDueDate(task.dueDate);
+      const badgeClass = isUrgent ? 'badge-due-urgent' : '';
+      const titleText = isUrgent ? '截止日期：今天或已過期' : '截止日期';
+      dueDateBadge = `<span class="badge badge-due-date ${badgeClass}" title="${titleText}">📅 ${escapeHtml(formattedDate)}</span>`;
     }
 
     return `
@@ -430,6 +472,7 @@
             ${priorityBadge}
             ${categoryBadge}
             ${assigneeBadge}
+            ${dueDateBadge}
           </div>
           <div class="drag-indicator" title="可拖曳">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
